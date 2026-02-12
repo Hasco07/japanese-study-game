@@ -7,23 +7,21 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      devOptions: {
-        enabled: true, // lets you test PWA stuff while running `npm run dev`
-      },
+      devOptions: { enabled: true },
       manifest: {
-        name: "Japanese Study Game",
-        short_name: "JP Study",
-        description: "Japanese Study Game Hub",
+        name: "Jaala Kana Garden",
+        short_name: "Kana Garden",
+        description: "Cute Japanese kana practice game with a growing garden.",
         start_url: "/",
         scope: "/",
         display: "standalone",
-        background_color: "#ffffff",
-        theme_color: "#ffffff",
+        background_color: "#fff7fd",
+        theme_color: "#f755b7",
         icons: [
           { src: "/pwa-192.png", sizes: "192x192", type: "image/png" },
-          { src: "/pwa-512.png", sizes: "512x512", type: "image/png" },
-        ],
-      },
-    }),
-  ],
+          { src: "/pwa-512.png", sizes: "512x512", type: "image/png" }
+        ]
+      }
+    })
+  ]
 });
