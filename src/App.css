@@ -171,3 +171,105 @@ p { color: #674b72; }
   .layout.single { grid-template-columns: 1fr; }
   .hero { flex-direction: column; align-items: flex-start; }
 }
+
+.collection-grid {
+  margin-top: 0.9rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.spirit-card {
+  border: 1px solid #f1cde7;
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.65rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.spirit-card.locked {
+  opacity: 0.7;
+  background: #fff8fc;
+}
+
+.spirit-emoji {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.spirit-name {
+  font-weight: 800;
+  color: #4f3160;
+}
+
+.spirit-meta {
+  font-size: 0.76rem;
+  color: #8d679f;
+}
+
+.last-pull {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+}
+
+.collection-tools {
+  margin-top: 0.8rem;
+}
+
+.favorite-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #4f3160;
+  font-weight: 700;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fav-btn {
+  border: 1px solid #f1cde7;
+  border-radius: 999px;
+  background: #fff4fb;
+  padding: 0.2rem 0.45rem;
+  cursor: pointer;
+}
+
+.fav-btn.on {
+  background: #ffddf2;
+  border-color: #f755b7;
+}
+
+.rarity-common {
+  box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+}
+
+.rarity-rare {
+  box-shadow: 0 0 0 1px rgba(124, 122, 255, 0.2), 0 0 12px rgba(124, 122, 255, 0.25);
+}
+
+.rarity-epic {
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(255, 164, 244, 0.65), 0 0 16px rgba(247, 85, 183, 0.45);
+}
+
+.rarity-epic::after {
+  content: "✨";
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  font-size: 0.8rem;
+  animation: twinkle 1.4s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { transform: scale(0.9); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; }
+}

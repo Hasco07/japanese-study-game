@@ -168,28 +168,75 @@ function GardenTab() {
 
 function GachaTab() {
   const [mode, setMode] = useState("kana-to-romaji");
-  const [state, setState] = useLocalStorageState("jaala_gacha", { tickets: 0, pulls: 0, owned: {} });
+  const [state, setState] = useLocalStorageState("jaala_gacha", { tickets: 0, pulls: 0, owned: {}, stardust: 0 });
+  const [favorites, setFavorites] = useLocalStorageState("jaala_gacha_favorites", []);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [lastPull, setLastPull] = useState(null);
 
   const collection = useMemo(() => ([
-    ...KANA_POOL.slice(0, 20).map((k) => ({ id: `spirit-${k.kana}`, name: `${k.kana} Spirit`, rarity: "common" })),
-    { id: "spirit-kitsune", name: "Kitsune Spirit", rarity: "rare" },
-    { id: "spirit-dragon", name: "Dragon Spirit", rarity: "epic" },
+    { id: "spirit-sakura", name: "Sakura Mochi", rarity: "common", emoji: "🌸", vibe: "Sweet blossom friend" },
+    { id: "spirit-maneki", name: "Lucky Neko", rarity: "common", emoji: "🐱", vibe: "Brings lucky study streaks" },
+    { id: "spirit-matcha", name: "Matcha Pudding", rarity: "common", emoji: "🍵", vibe: "Calm tea-time helper" },
+    { id: "spirit-dango", name: "Dango Trio", rarity: "common", emoji: "🍡", vibe: "Cheery snack squad" },
+    { id: "spirit-koi", name: "Koi Sparkle", rarity: "rare", emoji: "🎏", vibe: "Shimmering river guardian" },
+    { id: "spirit-tanuki", name: "Tanuki Buddy", rarity: "rare", emoji: "🦝", vibe: "Mischief but very lovable" },
+    { id: "spirit-kitsune", name: "Kitsune Charm", rarity: "rare", emoji: "🦊", vibe: "Mystic fox with fluffy tails" },
+    { id: "spirit-moonbun", name: "Moon Bunny", rarity: "epic", emoji: "🐰", vibe: "Legendary lunar cutie" },
+    { id: "spirit-dragon", name: "Pastel Dragon", rarity: "epic", emoji: "🐉", vibe: "Tiny but magical" },
   ]), []);
+
+  const favoriteSet = useMemo(() => new Set(favorites), [favorites]);
+  const visibleCollection = showFavoritesOnly
+    ? collection.filter((spirit) => favoriteSet.has(spirit.id))
+    : collection;
+
+  function stardustForRarity(rarity) {
+    if (rarity === "epic") return 20;
+    if (rarity === "rare") return 8;
+    return 3;
+  }
 
   function onCorrect() {
     setState((s) => ({ ...s, tickets: s.tickets + 1 }));
+  }
+
+  function toggleFavorite(id) {
+    setFavorites((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
 
   function pullOne() {
     setState((s) => {
       if (s.tickets < 1) return s;
       const roll = Math.random();
-      const rarity = roll < 0.86 ? "common" : roll < 0.97 ? "rare" : "epic";
+      const rarity = roll < 0.82 ? "common" : roll < 0.96 ? "rare" : "epic";
       const pool = collection.filter((c) => c.rarity === rarity);
       const picked = pool[Math.floor(Math.random() * pool.length)];
-      setLastPull(picked);
-      return { ...s, tickets: s.tickets - 1, pulls: s.pulls + 1, owned: { ...s.owned, [picked.id]: (s.owned[picked.id] ?? 0) + 1 } };
+      const previousCount = s.owned[picked.id] ?? 0;
+      const duplicateDust = previousCount > 0 ? stardustForRarity(picked.rarity) : 0;
+      setLastPull({ ...picked, duplicateDust });
+      return {
+        ...s,
+        tickets: s.tickets - 1,
+        pulls: s.pulls + 1,
+        stardust: s.stardust + duplicateDust,
+        owned: { ...s.owned, [picked.id]: previousCount + 1 },
+      };
+    });
+  }
+
+  function craftMissing() {
+    const cost = 30;
+    setState((s) => {
+      if (s.stardust < cost) return s;
+      const missing = collection.filter((spirit) => !(s.owned[spirit.id] > 0));
+      if (missing.length < 1) return s;
+      const picked = missing[Math.floor(Math.random() * missing.length)];
+      setLastPull({ ...picked, duplicateDust: 0, crafted: true });
+      return {
+        ...s,
+        stardust: s.stardust - cost,
+        owned: { ...s.owned, [picked.id]: 1 },
+      };
     });
   }
 
@@ -201,12 +248,59 @@ function GachaTab() {
         <p className="helper">Earn tickets by answering correctly, then collect cute spirits.</p>
         <div className="stats compact">
           <div className="pill">🎟️ Tickets: {state.tickets}</div>
+          <div className="pill">✨ Stardust: {state.stardust}</div>
           <div className="pill">Pulls: {state.pulls}</div>
-          <div className="pill">Owned: {Object.keys(state.owned).length}/{collection.length}</div>
+          <div className="pill">Owned: {Object.keys(state.owned).filter((id) => state.owned[id] > 0).length}/{collection.length}</div>
         </div>
-        <button className="btn active" onClick={pullOne} disabled={state.tickets < 1}>Use 1 ticket</button>
+
+        <div className="row">
+          <button className="btn active" onClick={pullOne} disabled={state.tickets < 1}>Use 1 ticket</button>
+          <button className="btn ghost" onClick={craftMissing} disabled={state.stardust < 30}>Craft missing (30 ✨)</button>
+        </div>
+
         <div className="panel">
-          {lastPull ? <p>Latest pull: <b>{lastPull.name}</b> ({lastPull.rarity})</p> : <p>No pull yet.</p>}
+          {lastPull ? (
+            <div className={`last-pull rarity-${lastPull.rarity}`}>
+              <div className="spirit-emoji">{lastPull.emoji}</div>
+              <div>
+                <p>
+                  <b>{lastPull.name}</b> ({lastPull.rarity}) {lastPull.crafted ? "• crafted" : ""}
+                </p>
+                <p className="helper">{lastPull.vibe}</p>
+                {lastPull.duplicateDust > 0 ? <p className="helper">Duplicate converted: +{lastPull.duplicateDust} stardust ✨</p> : null}
+              </div>
+            </div>
+          ) : <p>No pull yet.</p>}
+        </div>
+
+        <div className="row collection-tools">
+          <label className="favorite-toggle">
+            <input type="checkbox" checked={showFavoritesOnly} onChange={(e) => setShowFavoritesOnly(e.target.checked)} />
+            My Favorites only
+          </label>
+          <p className="helper">Tap 💖 on any spirit card to favorite it.</p>
+        </div>
+
+        <div className="collection-grid">
+          {visibleCollection.map((spirit) => {
+            const count = state.owned[spirit.id] ?? 0;
+            const unlocked = count > 0;
+            const favorited = favoriteSet.has(spirit.id);
+            return (
+              <div key={spirit.id} className={`spirit-card rarity-${spirit.rarity} ${unlocked ? "" : "locked"}`}>
+                <div className="card-top">
+                  <div className="spirit-emoji">{unlocked ? spirit.emoji : "❔"}</div>
+                  <button className={`fav-btn ${favorited ? "on" : ""}`} onClick={() => toggleFavorite(spirit.id)} title="Toggle favorite">💖</button>
+                </div>
+                <div className="spirit-name">{unlocked ? spirit.name : "Mystery Spirit"}</div>
+                <div className="helper">{unlocked ? spirit.vibe : "Keep studying to discover this cutie"}</div>
+                <div className="spirit-meta">{spirit.rarity} · owned {count}</div>
+              </div>
+            );
+          })}
+          {showFavoritesOnly && visibleCollection.length === 0 ? (
+            <div className="panel">No favorites yet. Mark spirits with 💖 first.</div>
+          ) : null}
         </div>
       </article>
     </section>
