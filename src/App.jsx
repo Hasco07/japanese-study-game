@@ -409,7 +409,11 @@ export default function App() {
       <header className="hero">
         <div>
           <h1>Jaala’s Japanese Adventure ✨</h1>
-          <p>Premium study game with full kana, Tokyo-to-Kyoto spirits, cozy café stories, and cinematic boss fights.</p>
+          <p>
+  I love you baby{" "}
+  <span style={{ color: "#ff4d8d", fontWeight: 800 }}>❤️</span>. I hope this study game helps. It's filled with full kana, Tokyo-to-Kyoto spirits, cozy café stories, and cinematic boss fights.
+</p>
+
         </div>
       </header>
       <nav className="top-tabs">
