@@ -411,7 +411,7 @@ export default function App() {
           <h1>Jaala’s Japanese Adventure ✨</h1>
           <p>
   I love you baby{" "}
-  <span style={{ color: "#ff4d8d", fontWeight: 800 }}>❤️</span>. I hope this study game helps. It's filled with full kana, Tokyo-to-Kyoto spirits, cozy café stories, and cinematic boss fights.
+  <span style={{ color: "#ff4d8d", fontWeight: 800 }}>❤️</span>. I built this little game just for you, so studying feels warm and fun. Full kana, Tokyo-to-Kyoto spirits, cozy café stories, and cinematic boss fights.
 </p>
 
         </div>
